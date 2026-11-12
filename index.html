@@ -1,22 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Geometry Dash Editor</title>
+    <title>Geometry Dash Level Editor</title>
 
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<div id="app">
-
     <!-- TOP BAR -->
-    <header id="topbar">
+    <header class="topbar">
 
-        <div class="logo">GEOMETRY DASH EDITOR</div>
+        <div class="logo">
+            GEOMETRY DASH EDITOR
+        </div>
 
         <div class="top-buttons">
             <button id="newLevel">NEW</button>
@@ -25,59 +26,115 @@
             <button id="importLevel">IMPORT</button>
         </div>
 
-        <div class="version">v0.1</div>
-
     </header>
 
 
     <!-- MAIN EDITOR -->
-    <main id="main">
+    <main class="main">
 
-        <!-- OBJECT PANEL -->
-        <aside id="objectPanel">
+        <!-- OBJECT LIBRARY -->
+        <aside class="sidebar">
 
-            <div class="panel-title">OBJECTS</div>
-
-            <div class="category-buttons">
-                <button class="category active" data-category="blocks">BLOCKS</button>
-                <button class="category" data-category="spikes">SPIKES</button>
-                <button class="category" data-category="special">SPECIAL</button>
+            <div class="sidebar-title">
+                OBJECTS
             </div>
 
-            <div id="objectList"></div>
+            <div class="categories">
+
+                <button class="category active" data-category="blocks">
+                    BLOCKS
+                </button>
+
+                <button class="category" data-category="spikes">
+                    SPIKES
+                </button>
+
+                <button class="category" data-category="special">
+                    SPECIAL
+                </button>
+
+            </div>
+
+            <div id="objectList" class="object-list"></div>
 
         </aside>
 
 
         <!-- EDITOR AREA -->
-        <section id="editorArea">
+        <section class="editor">
 
-            <div id="editorHeader">
+            <div class="editor-header">
 
-                <span id="levelName">Untitled Level</span>
+                <input
+                    id="levelName"
+                    value="Untitled Level"
+                    maxlength="40"
+                >
 
                 <div class="editor-tools">
 
-                    <button id="selectTool" class="tool active">SELECT</button>
-                    <button id="deleteTool" class="tool">DELETE</button>
+                    <button class="tool active" data-tool="select">
+                        SELECT
+                    </button>
 
-                    <button id="undo">UNDO</button>
-                    <button id="redo">REDO</button>
+                    <button class="tool" data-tool="delete">
+                        DELETE
+                    </button>
+
+                    <button id="undoButton" class="tool">
+                        UNDO
+                    </button>
+
+                    <button id="redoButton" class="tool">
+                        REDO
+                    </button>
+
+                    <button id="playTest" class="play-button">
+                        PLAY
+                    </button>
 
                 </div>
 
             </div>
 
-            <canvas id="gameCanvas"></canvas>
 
-            <div id="editorFooter">
+            <!-- CANVAS -->
+            <div class="canvas-container">
 
-                <span id="coordinates">X: 0 | Y: 0</span>
+                <canvas id="gameCanvas"></canvas>
 
-                <div>
+            </div>
+
+
+            <!-- PLAYTEST CONTROLS -->
+            <div id="playtestControls">
+
+                <button id="pauseTest">PAUSE</button>
+                <button id="restartTest">RESTART</button>
+                <button id="exitTest">EXIT</button>
+
+            </div>
+
+
+            <!-- BOTTOM BAR -->
+            <div class="bottom-bar">
+
+                <span id="coordinates">
+                    X: 0 | Y: 0
+                </span>
+
+                <span id="objectCount">
+                    Objects: 0
+                </span>
+
+                <div class="zoom-controls">
+
                     <button id="zoomOut">-</button>
+
                     <span id="zoomValue">100%</span>
+
                     <button id="zoomIn">+</button>
+
                 </div>
 
             </div>
@@ -87,26 +144,37 @@
     </main>
 
 
-    <!-- BOTTOM BAR -->
-    <footer id="bottomBar">
+    <!-- STATUS BAR -->
+    <footer class="statusbar">
 
-        <span>BUILD MODE</span>
-        <span id="objectCount">Objects: 0</span>
-        <span>SCROLL: ZOOM | MIDDLE MOUSE: PAN</span>
+        <span id="statusText">
+            BUILD MODE
+        </span>
+
+        <span>
+            WASD / ARROWS: MOVE CAMERA | SCROLL: ZOOM
+        </span>
 
     </footer>
 
-</div>
 
-<input type="file" id="importFile" accept=".json" hidden>
+    <input
+        type="file"
+        id="fileInput"
+        accept=".json"
+        hidden
+    >
 
 
-<script src="js/objects.js"></script>
-<script src="js/level.js"></script>
-<script src="js/save.js"></script>
-<script src="js/editor.js"></script>
-<script src="js/toolbar.js"></script>
-<script src="js/main.js"></script>
+    <!-- JAVASCRIPT -->
+    <script src="js/objects.js"></script>
+    <script src="js/level.js"></script>
+    <script src="js/save.js"></script>
+    <script src="js/editor.js"></script>
+    <script src="js/player.js"></script>
+    <script src="js/toolbar.js"></script>
+    <script src="js/main.js"></script>
 
 </body>
+
 </html>
