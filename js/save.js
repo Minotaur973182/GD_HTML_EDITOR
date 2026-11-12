@@ -1,8 +1,13 @@
+const SAVE_KEY = "geometryDashEditorSave";
+
+
+/* SAVE */
+
 function saveLevel() {
 
-    const data = {
+    level.name = document.getElementById("levelName").value;
 
-        version: "0.1",
+    const data = {
 
         name: level.name,
 
@@ -11,20 +16,21 @@ function saveLevel() {
     };
 
     localStorage.setItem(
-        "geometryDashEditorSave",
+        SAVE_KEY,
         JSON.stringify(data)
     );
 
-    alert("Level saved!");
+    document.getElementById("statusText").textContent =
+        "LEVEL SAVED";
 
 }
 
 
+/* LOAD */
+
 function loadLevel() {
 
-    const saved = localStorage.getItem(
-        "geometryDashEditorSave"
-    );
+    const saved = localStorage.getItem(SAVE_KEY);
 
     if (!saved) return;
 
@@ -32,38 +38,62 @@ function loadLevel() {
 
         const data = JSON.parse(saved);
 
+        if (!data || !Array.isArray(data.objects)) {
+            return;
+        }
+
         level.name = data.name || "Untitled Level";
 
-        level.objects = data.objects || [];
+        level.objects = data.objects.filter(object => {
+
+            return (
+                getObjectType(object.type) &&
+                Number.isFinite(object.x) &&
+                Number.isFinite(object.y)
+            );
+
+        }).map(object => ({
+
+            id: object.id || crypto.randomUUID(),
+
+            type: object.type,
+
+            x: object.x,
+
+            y: object.y
+
+        }));
+
+        document.getElementById("levelName").value = level.name;
 
         level.selected = null;
 
         level.history = [];
+
         level.historyIndex = -1;
 
         saveHistory();
 
-        document.getElementById("levelName").textContent =
-            level.name;
-
         updateObjectCount();
 
-    } catch (error) {
+    }
 
-        alert("Could not load saved level.");
+    catch (error) {
+
+        console.error("Could not load saved level:", error);
 
     }
 
 }
 
 
+/* EXPORT */
+
 function exportLevel() {
 
     const data = {
 
-        version: "0.1",
-
-        name: level.name,
+        name: document.getElementById("levelName").value,
 
         objects: level.objects
 
@@ -79,6 +109,7 @@ function exportLevel() {
     const link = document.createElement("a");
 
     link.href = url;
+
     link.download = "level.json";
 
     link.click();
@@ -88,60 +119,82 @@ function exportLevel() {
 }
 
 
+/* IMPORT */
+
 function importLevel(file) {
 
     const reader = new FileReader();
 
-    reader.onload = event => {
+    reader.onload = () => {
 
         try {
 
-            const data = JSON.parse(event.target.result);
+            const data = JSON.parse(reader.result);
 
-            if (!Array.isArray(data.objects)) {
-                throw new Error("Invalid level format");
+            if (!data || !Array.isArray(data.objects)) {
+
+                alert("Invalid level file.");
+
+                return;
+
             }
+
+
+            const importedObjects = [];
 
             for (const object of data.objects) {
 
-                const type = getObjectType(object.type);
-
                 if (
-                    !type ||
+                    !getObjectType(object.type) ||
                     !Number.isFinite(object.x) ||
                     !Number.isFinite(object.y)
                 ) {
-                    throw new Error("Invalid object data");
+                    continue;
                 }
+
+                importedObjects.push({
+
+                    id: crypto.randomUUID(),
+
+                    type: object.type,
+
+                    x: object.x,
+
+                    y: Math.max(0, object.y)
+
+                });
 
             }
 
-            level.name = data.name || "Imported Level";
 
-            level.objects = data.objects.map(object => ({
-                ...object,
-                id: crypto.randomUUID()
-            }));
+            level.objects = importedObjects;
+
+            level.name = data.name || "Imported Level";
 
             level.selected = null;
 
+            document.getElementById("levelName").value = level.name;
+
             level.history = [];
+
             level.historyIndex = -1;
 
             saveHistory();
-
-            document.getElementById("levelName").textContent =
-                level.name;
 
             updateObjectCount();
 
             renderEditor();
 
-            alert("Level imported!");
+            document.getElementById("statusText").textContent =
+                "LEVEL IMPORTED";
 
-        } catch (error) {
+        }
 
-            alert("Invalid level file.");
+        catch (error) {
+
+            alert("Could not import this level.");
+
+            console.error(error);
 
         }
 
@@ -152,37 +205,45 @@ function importLevel(file) {
 }
 
 
-document.getElementById("saveLevel").addEventListener(
-    "click",
-    saveLevel
-);
+/* BUTTONS */
+
+document.getElementById("saveLevel").addEventListener("click", () => {
+
+    saveLevel();
+
+});
 
 
-document.getElementById("exportLevel").addEventListener(
-    "click",
-    exportLevel
-);
+document.getElementById("exportLevel").addEventListener("click", () => {
+
+    exportLevel();
+
+});
 
 
-document.getElementById("importLevel").addEventListener(
-    "click",
-    () => document.getElementById("importFile").click()
-);
+document.getElementById("importLevel").addEventListener("click", () => {
+
+    document.getElementById("fileInput").click();
+
+});
 
 
-document.getElementById("importFile").addEventListener(
-    "change",
-    event => {
+document.getElementById("fileInput").addEventListener("change", event => {
 
-        if (event.target.files.length) {
-            importLevel(event.target.files[0]);
-        }
+    const file = event.target.files[0];
+
+    if (file) {
+
+        importLevel(file);
 
         event.target.value = "";
 
     }
-);
 
+});
+
+
+/* NEW LEVEL */
 
 document.getElementById("newLevel").addEventListener("click", () => {
 
@@ -191,19 +252,30 @@ document.getElementById("newLevel").addEventListener("click", () => {
     }
 
     level.objects = [];
-    level.name = "Untitled Level";
+
     level.selected = null;
 
+    level.name = "Untitled Level";
+
+    document.getElementById("levelName").value = level.name;
+
     level.history = [];
+
     level.historyIndex = -1;
 
     saveHistory();
 
-    document.getElementById("levelName").textContent =
-        level.name;
-
     updateObjectCount();
 
     renderEditor();
+
+});
+
+
+/* LEVEL NAME */
+
+document.getElementById("levelName").addEventListener("input", event => {
+
+    level.name = event.target.value;
 
 });
