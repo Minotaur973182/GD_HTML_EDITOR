@@ -6,6 +6,7 @@ let gridSize = 30;
 let cameraX = 0;
 
 let activeTool = "select";
+
 let selectedObjectType = null;
 
 let mouseX = 0;
@@ -15,11 +16,16 @@ let dragging = false;
 let panning = false;
 
 let dragObject = null;
-let dragOffset = { x: 0, y: 0 };
 
-let panStart = { x: 0, camera: 0 };
+let dragOffset = {
+    x: 0,
+    y: 0
+};
 
-let pointerDown = false;
+let panStart = {
+    x: 0,
+    camera: 0
+};
 
 
 function resizeCanvas() {
@@ -28,8 +34,8 @@ function resizeCanvas() {
 
     const dpr = window.devicePixelRatio || 1;
 
-    canvas.width = rect.width * dpr;
-    canvas.height = rect.height * dpr;
+    canvas.width = Math.max(1, Math.round(rect.width * dpr));
+    canvas.height = Math.max(1, Math.round(rect.height * dpr));
 
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
@@ -71,7 +77,7 @@ function snap(value) {
 }
 
 
-function getObjectAt(x, y) {
+function getObjectAt(worldX, worldY) {
 
     for (let i = level.objects.length - 1; i >= 0; i--) {
 
@@ -81,15 +87,12 @@ function getObjectAt(x, y) {
 
         if (!type) continue;
 
-        const insideX =
-            x >= object.x &&
-            x <= object.x + type.width;
-
-        const insideY =
-            y >= object.y &&
-            y <= object.y + type.height;
-
-        if (insideX && insideY) {
+        if (
+            worldX >= object.x &&
+            worldX <= object.x + type.width &&
+            worldY >= object.y - type.height &&
+            worldY <= object.y
+        ) {
             return object;
         }
 
@@ -100,36 +103,36 @@ function getObjectAt(x, y) {
 }
 
 
-function renderEditor() {
+/* DRAW GRID AND WORLD */
+
+function renderWorld() {
 
     const width = canvas.clientWidth;
     const height = canvas.clientHeight;
 
     ctx.clearRect(0, 0, width, height);
 
-    // BACKGROUND
-
-    ctx.fillStyle = "#263e55";
+    ctx.fillStyle = "#202f40";
     ctx.fillRect(0, 0, width, height);
 
 
-    // GRID
+    /* GRID */
 
-    const origin = worldToScreen(0, 0);
-
-    ctx.strokeStyle = "rgba(130,180,210,0.12)";
+    ctx.strokeStyle = "rgba(255,255,255,0.08)";
     ctx.lineWidth = 1;
 
-    const startX = Math.floor(cameraX - width / gridSize / 2) - 2;
-    const endX = Math.ceil(cameraX + width / gridSize / 2) + 2;
+    const startX = Math.floor(cameraX - width / gridSize / 2) - 1;
+    const endX = Math.ceil(cameraX + width / gridSize / 2) + 1;
 
     for (let x = startX; x <= endX; x++) {
 
-        const sx = worldToScreen(x, 0).x;
+        const screen = worldToScreen(x, 0);
 
         ctx.beginPath();
-        ctx.moveTo(sx, 0);
-        ctx.lineTo(sx, height);
+
+        ctx.moveTo(screen.x, 0);
+        ctx.lineTo(screen.x, height);
+
         ctx.stroke();
 
     }
@@ -137,31 +140,42 @@ function renderEditor() {
 
     for (let y = 0; y < height / gridSize + 2; y++) {
 
-        const sy = worldToScreen(0, y).y;
+        const screen = worldToScreen(0, y);
 
         ctx.beginPath();
-        ctx.moveTo(0, sy);
-        ctx.lineTo(width, sy);
+
+        ctx.moveTo(0, screen.y);
+        ctx.lineTo(width, screen.y);
+
         ctx.stroke();
 
     }
 
 
-    // GROUND
+    /* GROUND */
 
-    ctx.fillStyle = "#132a3c";
-    ctx.fillRect(0, origin.y, width, height - origin.y);
+    const ground = worldToScreen(0, 0);
 
-    ctx.strokeStyle = "#70b7d5";
-    ctx.lineWidth = 3;
+    ctx.fillStyle = "#344a60";
 
-    ctx.beginPath();
-    ctx.moveTo(0, origin.y);
-    ctx.lineTo(width, origin.y);
-    ctx.stroke();
+    ctx.fillRect(
+        0,
+        ground.y,
+        width,
+        height - ground.y
+    );
+
+    ctx.fillStyle = "#83b8e8";
+
+    ctx.fillRect(
+        0,
+        ground.y,
+        width,
+        3
+    );
 
 
-    // OBJECTS
+    /* OBJECTS */
 
     for (const object of level.objects) {
 
@@ -177,24 +191,36 @@ function renderEditor() {
 
     }
 
+}
 
-    // SELECTION
 
-    if (level.selected) {
+/* EDITOR RENDER */
 
-        const object = level.objects.find(
-            obj => obj.id === level.selected
-        );
+function renderEditor() {
 
-        if (object) {
+    if (playtesting) return;
 
-            const type = getObjectType(object.type);
+    renderWorld();
 
-            const position = worldToScreen(object.x, object.y);
+
+    /* SELECTION */
+
+    const selected = level.objects.find(
+        object => object.id === level.selected
+    );
+
+    if (selected) {
+
+        const type = getObjectType(selected.type);
+
+        if (type) {
+
+            const position = worldToScreen(selected.x, selected.y);
 
             ctx.strokeStyle = "#ffffff";
             ctx.lineWidth = 2;
-            ctx.setLineDash([5, 3]);
+
+            ctx.setLineDash([5, 4]);
 
             ctx.strokeRect(
                 position.x,
@@ -210,39 +236,41 @@ function renderEditor() {
     }
 
 
-    // PLACEMENT PREVIEW
+    /* PLACEMENT PREVIEW */
 
-    if (selectedObjectType && activeTool === "place" && !pointerDown) {
+    if (selectedObjectType && activeTool === "place") {
 
         const world = screenToWorld(mouseX, mouseY);
 
-        const type = getObjectType(selectedObjectType);
+        const x = snap(world.x);
+        const y = Math.max(0, snap(world.y));
 
-        if (type) {
+        const position = worldToScreen(x, y);
 
-            const x = snap(world.x);
-            const y = Math.max(0, snap(world.y));
+        const preview = {
 
-            const position = worldToScreen(x, y);
+            type: selectedObjectType
 
-            ctx.globalAlpha = 0.5;
+        };
 
-            drawObject(
-                ctx,
-                { type: selectedObjectType },
-                position.x,
-                position.y,
-                gridSize
-            );
+        ctx.globalAlpha = 0.5;
 
-            ctx.globalAlpha = 1;
+        drawObject(
+            ctx,
+            preview,
+            position.x,
+            position.y,
+            gridSize
+        );
 
-        }
+        ctx.globalAlpha = 1;
 
     }
 
 }
 
+
+/* POINTER EVENTS */
 
 canvas.addEventListener("pointermove", event => {
 
@@ -251,10 +279,7 @@ canvas.addEventListener("pointermove", event => {
     mouseX = event.clientX - rect.left;
     mouseY = event.clientY - rect.top;
 
-    const world = screenToWorld(mouseX, mouseY);
-
-    document.getElementById("coordinates").textContent =
-        `X: ${snap(world.x)} | Y: ${snap(world.y)}`;
+    if (playtesting) return;
 
 
     if (panning) {
@@ -263,32 +288,26 @@ canvas.addEventListener("pointermove", event => {
             (event.clientX - panStart.x) / gridSize;
 
         renderEditor();
+
         return;
 
     }
+
+
+    const world = screenToWorld(mouseX, mouseY);
+
+    document.getElementById("coordinates").textContent =
+        `X: ${world.x.toFixed(1)} | Y: ${world.y.toFixed(1)}`;
 
 
     if (dragging && dragObject) {
 
-        const world = screenToWorld(mouseX, mouseY);
+        const x = snap(world.x - dragOffset.x);
+        const y = Math.max(0, snap(world.y - dragOffset.y));
 
-        const type = getObjectType(dragObject.type);
-
-        moveObject(
-
-            dragObject.id,
-
-            snap(world.x - dragOffset.x),
-
-            Math.max(0, snap(world.y - dragOffset.y))
-
-        );
-
-        renderEditor();
-        return;
+        moveObject(dragObject.id, x, y);
 
     }
-
 
     renderEditor();
 
@@ -297,133 +316,145 @@ canvas.addEventListener("pointermove", event => {
 
 canvas.addEventListener("pointerdown", event => {
 
-    pointerDown = true;
+    if (playtesting) return;
 
     const rect = canvas.getBoundingClientRect();
 
     mouseX = event.clientX - rect.left;
     mouseY = event.clientY - rect.top;
 
-
-    // Middle mouse = PAN
-
-    if (event.button === 1) {
+    if (event.button === 1 || event.button === 2) {
 
         panning = true;
 
-        panStart = {
-            x: event.clientX,
-            camera: cameraX
-        };
+        panStart.x = event.clientX;
+        panStart.camera = cameraX;
+
+        event.preventDefault();
 
         return;
 
     }
-
-
-    if (event.button !== 0) return;
 
     const world = screenToWorld(mouseX, mouseY);
 
+    const x = snap(world.x);
+    const y = Math.max(0, snap(world.y));
 
-    // DELETE TOOL
-
-    if (activeTool === "delete") {
-
-        const object = getObjectAt(world.x, world.y);
-
-        if (object) {
-            removeObject(object.id);
-        }
-
-        renderEditor();
-        return;
-
-    }
-
-
-    // PLACE OBJECT
 
     if (activeTool === "place" && selectedObjectType) {
 
-        addObject(
-
-            selectedObjectType,
-
-            snap(world.x),
-
-            Math.max(0, snap(world.y))
-
-        );
+        addObject(selectedObjectType, x, y);
 
         renderEditor();
+
         return;
 
     }
 
 
-    // SELECT OBJECT
+    const clicked = getObjectAt(world.x, world.y);
 
-    if (activeTool === "select") {
 
-        const object = getObjectAt(world.x, world.y);
+    if (activeTool === "delete") {
 
-        if (object) {
-
-            level.selected = object.id;
-
-            saveHistory();
-
-            dragObject = object;
-
-            const type = getObjectType(object.type);
-
-            dragOffset.x = world.x - object.x;
-            dragOffset.y = world.y - object.y;
-
-            dragging = true;
-
-        } else {
-
-            level.selected = null;
-
+        if (clicked) {
+            removeObject(clicked.id);
         }
 
         renderEditor();
 
+        return;
+
     }
 
-});
 
+    if (clicked) {
 
-window.addEventListener("pointerup", () => {
+        level.selected = clicked.id;
 
-    dragging = false;
-    panning = false;
-    dragObject = null;
-    pointerDown = false;
+        dragObject = clicked;
+
+        dragOffset.x = world.x - clicked.x;
+        dragOffset.y = world.y - clicked.y;
+
+        dragging = true;
+
+    }
+
+    else {
+
+        level.selected = null;
+
+    }
 
     renderEditor();
 
 });
 
 
+function finishPointerAction() {
+
+    if (dragging && dragObject) {
+
+        saveHistory();
+
+    }
+
+    dragging = false;
+    panning = false;
+    dragObject = null;
+
+    renderEditor();
+
+}
+
+
+window.addEventListener("pointerup", finishPointerAction);
+
+canvas.addEventListener("contextmenu", event => {
+    event.preventDefault();
+});
+
+
+/* ZOOM */
+
+function updateZoom() {
+
+    document.getElementById("zoomValue").textContent =
+        Math.round(gridSize / 30 * 100) + "%";
+
+    renderEditor();
+
+}
+
+
+function zoom(amount) {
+
+    gridSize = Math.max(12, Math.min(90, gridSize + amount));
+
+    updateZoom();
+
+}
+
+
 canvas.addEventListener("wheel", event => {
 
     event.preventDefault();
 
-    const oldSize = gridSize;
+    const oldGridSize = gridSize;
 
-    const factor = event.deltaY < 0 ? 1.1 : 0.9;
+    const rect = canvas.getBoundingClientRect();
 
-    const newSize = Math.max(
-        10,
-        Math.min(90, gridSize * factor)
-    );
+    const mouseX = event.clientX - rect.left;
+    const mouseY = event.clientY - rect.top;
 
     const worldBefore = screenToWorld(mouseX, mouseY);
 
-    gridSize = newSize;
+    gridSize = Math.max(
+        12,
+        Math.min(90, gridSize + (event.deltaY < 0 ? 3 : -3))
+    );
 
     const worldAfter = screenToWorld(mouseX, mouseY);
 
@@ -431,30 +462,15 @@ canvas.addEventListener("wheel", event => {
 
     updateZoom();
 
-    renderEditor();
-
 }, { passive: false });
 
 
-function updateZoom() {
+/* RESIZE */
 
-    document.getElementById("zoomValue").textContent =
-        Math.round(gridSize / 30 * 100) + "%";
+const resizeObserver = new ResizeObserver(() => {
+    resizeCanvas();
+});
 
-}
-
-
-function zoom(amount) {
-
-    gridSize = Math.max(
-        10,
-        Math.min(90, gridSize + amount)
-    );
-
-    updateZoom();
-    renderEditor();
-
-}
-
+resizeObserver.observe(canvas);
 
 window.addEventListener("resize", resizeCanvas);
