@@ -1,60 +1,51 @@
-const objectList = document.getElementById("objectList");
-
-let currentCategory = "blocks";
-
+/* OBJECT CATEGORIES */
 
 function loadObjectCategory(category) {
 
-    currentCategory = category;
+    const container = document.getElementById("objectList");
 
-    objectList.innerHTML = "";
-
-    document.querySelectorAll(".category").forEach(button => {
-
-        button.classList.toggle(
-            "active",
-            button.dataset.category === category
-        );
-
-    });
-
+    container.innerHTML = "";
 
     const objects = OBJECT_TYPES[category];
 
-    objects.forEach(object => {
+    if (!objects) return;
 
-        const button = document.createElement("button");
 
-        button.className = "object-button";
+    for (const object of objects) {
 
-        const preview = document.createElement("canvas");
+        const card = document.createElement("div");
 
-        preview.width = 40;
-        preview.height = 40;
+        card.className = "object-card";
+
+        if (selectedObjectType === object.id) {
+            card.classList.add("active");
+        }
+
+        const preview = document.createElement("div");
 
         preview.className = "object-preview";
 
-        const previewCtx = preview.getContext("2d");
+        preview.style.background = object.color;
 
-        drawObject(
-            previewCtx,
-            { type: object.id },
-            5,
-            32,
-            24
-        );
+        if (object.id === "spike") {
 
+            preview.style.clipPath =
+                "polygon(50% 0%, 100% 100%, 0% 100%)";
 
-        const label = document.createElement("span");
+        }
 
-        label.className = "object-label";
-        label.textContent = object.name;
+        const name = document.createElement("div");
 
-        button.appendChild(preview);
-        button.appendChild(label);
+        name.className = "object-name";
+
+        name.textContent = object.name;
 
 
-        button.addEventListener("click", () => {
+        card.appendChild(preview);
+        card.appendChild(name);
+
+
+        card.addEventListener("click", () => {
 
             selectedObjectType = object.id;
 
@@ -62,36 +53,47 @@ function loadObjectCategory(category) {
 
             updateToolButtons();
 
+            loadObjectCategory(category);
+
             renderEditor();
 
         });
 
 
-        objectList.appendChild(button);
+        container.appendChild(card);
+
+    }
+
+}
+
+
+/* TOOL BUTTONS */
+
+function updateToolButtons() {
+
+    document.querySelectorAll(".tool[data-tool]").forEach(button => {
+
+        button.classList.toggle(
+            "active",
+            button.dataset.tool === activeTool
+        );
 
     });
 
 }
 
 
-function updateToolButtons() {
-
-    document.getElementById("selectTool").classList.toggle(
-        "active",
-        activeTool === "select"
-    );
-
-    document.getElementById("deleteTool").classList.toggle(
-        "active",
-        activeTool === "delete"
-    );
-
-}
-
+/* CATEGORIES */
 
 document.querySelectorAll(".category").forEach(button => {
 
     button.addEventListener("click", () => {
+
+        document.querySelectorAll(".category").forEach(item => {
+            item.classList.remove("active");
+        });
+
+        button.classList.add("active");
 
         loadObjectCategory(button.dataset.category);
 
@@ -100,102 +102,157 @@ document.querySelectorAll(".category").forEach(button => {
 });
 
 
-document.getElementById("selectTool").addEventListener("click", () => {
+/* TOOLS */
 
-    activeTool = "select";
-    selectedObjectType = null;
+document.querySelectorAll(".tool[data-tool]").forEach(button => {
 
-    updateToolButtons();
-    renderEditor();
+    button.addEventListener("click", () => {
 
-});
+        activeTool = button.dataset.tool;
 
+        selectedObjectType = null;
 
-document.getElementById("deleteTool").addEventListener("click", () => {
+        updateToolButtons();
 
-    activeTool = "delete";
-    selectedObjectType = null;
+        loadObjectCategory(
+            document.querySelector(".category.active").dataset.category
+        );
 
-    updateToolButtons();
-    renderEditor();
+        renderEditor();
 
-});
-
-
-document.getElementById("undo").addEventListener("click", () => {
-
-    undo();
-    renderEditor();
+    });
 
 });
 
 
-document.getElementById("redo").addEventListener("click", () => {
+/* UNDO AND REDO */
 
-    redo();
-    renderEditor();
+document.getElementById("undoButton").addEventListener("click", () => {
+
+    if (!playtesting) undo();
 
 });
 
+
+document.getElementById("redoButton").addEventListener("click", () => {
+
+    if (!playtesting) redo();
+
+});
+
+
+/* ZOOM */
 
 document.getElementById("zoomIn").addEventListener("click", () => {
-
-    zoom(5);
-
+    zoom(3);
 });
 
 
 document.getElementById("zoomOut").addEventListener("click", () => {
+    zoom(-3);
+});
 
-    zoom(-5);
+
+/* PLAYTEST BUTTONS */
+
+document.getElementById("playTest").addEventListener("click", () => {
+
+    startPlaytest();
 
 });
 
 
-document.addEventListener("keydown", event => {
+document.getElementById("pauseTest").addEventListener("click", () => {
 
-    if (event.target.matches("input, textarea")) return;
+    togglePause();
 
-    if (event.key === "Escape") {
+});
+
+
+document.getElementById("restartTest").addEventListener("click", () => {
+
+    restartPlaytest();
+
+});
+
+
+document.getElementById("exitTest").addEventListener("click", () => {
+
+    exitPlaytest();
+
+});
+
+
+/* KEYBOARD CONTROLS */
+
+window.addEventListener("keydown", event => {
+
+    if (playtesting) {
+
+        if (event.code === "Escape") {
+
+            exitPlaytest();
+
+        }
+
+        return;
+
+    }
+
+
+    if (
+        event.target instanceof HTMLInputElement ||
+        event.target instanceof HTMLTextAreaElement
+    ) {
+        return;
+    }
+
+
+    if (event.code === "Escape") {
 
         activeTool = "select";
+
         selectedObjectType = null;
 
         updateToolButtons();
+
+        loadObjectCategory(
+            document.querySelector(".category.active").dataset.category
+        );
+
         renderEditor();
 
     }
 
-    if (event.key === "Delete" || event.key === "Backspace") {
+
+    if (event.code === "Delete" || event.code === "Backspace") {
 
         if (level.selected) {
 
             removeObject(level.selected);
+
             renderEditor();
 
         }
 
     }
 
-    if (event.ctrlKey && event.key.toLowerCase() === "z") {
+
+    if (event.ctrlKey && event.code === "KeyZ") {
 
         event.preventDefault();
 
         undo();
-        renderEditor();
 
     }
 
-    if (event.ctrlKey && event.key.toLowerCase() === "y") {
+
+    if (event.ctrlKey && event.code === "KeyY") {
 
         event.preventDefault();
 
         redo();
-        renderEditor();
 
     }
 
 });
-
-
-loadObjectCategory("blocks");
