@@ -5,44 +5,20 @@
 }
 
 body {
-    background: #101820;
+    background: #101923;
     color: white;
     font-family: Arial, sans-serif;
-    overflow: hidden;
-    user-select: none;
-}
-
-button {
-    background: linear-gradient(#647d91, #354b60);
-    border: 2px solid #172d40;
-    border-radius: 5px;
-    color: white;
-    padding: 8px 13px;
-    font-weight: bold;
-    cursor: pointer;
-    text-shadow: 1px 2px #263746;
-}
-
-button:hover {
-    filter: brightness(1.25);
-}
-
-button:active {
-    transform: translateY(1px);
-}
-
-#app {
     height: 100vh;
-    display: flex;
-    flex-direction: column;
+    overflow: hidden;
 }
+
 
 /* TOP BAR */
 
-#topbar {
+.topbar {
     height: 55px;
-    background: linear-gradient(#354f67, #20364a);
-    border-bottom: 3px solid #101f30;
+    background: linear-gradient(#315d86, #1c3855);
+    border-bottom: 3px solid #101e2c;
 
     display: flex;
     align-items: center;
@@ -52,189 +28,275 @@ button:active {
 }
 
 .logo {
-    font-size: 18px;
-    font-weight: 900;
-    letter-spacing: 2px;
-    text-shadow: 2px 2px #172638;
+    font-size: 19px;
+    font-weight: bold;
+    letter-spacing: 1px;
 }
 
 .top-buttons {
     display: flex;
-    gap: 7px;
+    gap: 8px;
 }
 
-.version {
-    color: #9eafbd;
-    font-size: 12px;
+button {
+    cursor: pointer;
+    color: white;
+    font-weight: bold;
+    border: 2px solid #101f30;
+    border-radius: 4px;
+    background: linear-gradient(#4779a7, #294d70);
+    padding: 7px 13px;
+}
+
+button:hover {
+    filter: brightness(1.25);
+}
+
+button:active {
+    filter: brightness(0.85);
 }
 
 
 /* MAIN */
 
-#main {
-    flex: 1;
+.main {
     display: flex;
-    min-height: 0;
+    height: calc(100vh - 85px);
 }
 
 
-/* OBJECT PANEL */
+/* SIDEBAR */
 
-#objectPanel {
-    width: 190px;
-    min-width: 190px;
+.sidebar {
+    width: 220px;
+    min-width: 220px;
 
-    background: linear-gradient(90deg, #273f54, #1d3246);
-
-    border-right: 3px solid #101f30;
+    background: #1b2c3e;
+    border-right: 3px solid #0b1723;
 
     display: flex;
     flex-direction: column;
 }
 
-.panel-title {
-    text-align: center;
+.sidebar-title {
     padding: 15px;
+    text-align: center;
+
     font-weight: bold;
-    font-size: 16px;
-    background: #182b3d;
+    background: #294b6c;
+
     border-bottom: 2px solid #101f30;
 }
 
-.category-buttons {
+.categories {
     display: flex;
-    flex-direction: column;
-    padding: 7px;
-    gap: 5px;
+    flex-wrap: wrap;
 }
 
 .category {
-    width: 100%;
+    flex: 1;
+    border-radius: 0;
+    padding: 10px 4px;
+    font-size: 11px;
 }
 
 .category.active {
-    background: linear-gradient(#a2c5dc, #547e9e);
-    border-color: #b5d9ec;
+    background: linear-gradient(#64a4d9, #32658e);
 }
 
-#objectList {
-    flex: 1;
-    overflow-y: auto;
-    padding: 8px;
-
+.object-list {
+    padding: 10px;
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    align-content: start;
-    gap: 7px;
+    gap: 8px;
+
+    overflow-y: auto;
 }
 
-.object-button {
+.object-card {
     height: 75px;
-    background: linear-gradient(#405e77, #263d54);
-    border: 2px solid #15283a;
+
+    background: #29435d;
+    border: 2px solid #101f30;
+    border-radius: 5px;
 
     display: flex;
     flex-direction: column;
-    align-items: center;
     justify-content: center;
+    align-items: center;
 
-    gap: 5px;
+    cursor: pointer;
+}
+
+.object-card:hover {
+    background: #3d658b;
+}
+
+.object-card.active {
+    border-color: #7dcaff;
+    background: #365e80;
 }
 
 .object-preview {
     width: 30px;
     height: 30px;
+    margin-bottom: 5px;
 }
 
-.object-label {
+.object-name {
     font-size: 10px;
+    font-weight: bold;
 }
 
 
 /* EDITOR */
 
-#editorArea {
+.editor {
     flex: 1;
     min-width: 0;
 
     display: flex;
     flex-direction: column;
-    background: #182c40;
+    background: #152536;
 }
 
-#editorHeader {
-    height: 43px;
+.editor-header {
+    height: 48px;
     flex-shrink: 0;
+
+    background: #243e58;
+    border-bottom: 2px solid #0c1926;
 
     display: flex;
     align-items: center;
     justify-content: space-between;
 
     padding: 0 12px;
-
-    background: linear-gradient(#405c74, #2b435a);
-    border-bottom: 2px solid #101f30;
 }
 
 #levelName {
-    font-weight: bold;
+    width: 180px;
+    padding: 7px;
+
+    color: white;
+    background: #15283b;
+
+    border: 2px solid #101f30;
+    border-radius: 4px;
 }
 
 .editor-tools {
     display: flex;
-    gap: 5px;
+    gap: 6px;
+}
+
+.tool {
+    font-size: 11px;
+    padding: 7px 10px;
 }
 
 .tool.active {
-    background: linear-gradient(#a5d4ed, #4c87ac);
-    border-color: #b8e4ff;
+    background: linear-gradient(#64a4d9, #32658e);
+}
+
+.play-button {
+    background: linear-gradient(#62c979, #267d40);
+    min-width: 65px;
+}
+
+
+/* CANVAS */
+
+.canvas-container {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    background: #202f40;
 }
 
 #gameCanvas {
-    flex: 1;
     display: block;
     width: 100%;
-    min-height: 0;
-
-    background: #263e55;
-
+    height: 100%;
     cursor: crosshair;
-    touch-action: none;
 }
 
-#editorFooter {
-    height: 40px;
+
+/* PLAYTEST */
+
+#playtestControls {
+    display: none;
+
+    height: 48px;
     flex-shrink: 0;
 
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    padding: 0 15px;
-
-    background: linear-gradient(#344e65, #20364a);
+    background: #152b40;
     border-top: 2px solid #101f30;
 
-    font-size: 12px;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+#playtestControls button {
+    min-width: 85px;
+}
+
+#pauseTest {
+    background: linear-gradient(#e0a84c, #a36b20);
+}
+
+#restartTest {
+    background: linear-gradient(#4779a7, #294d70);
+}
+
+#exitTest {
+    background: linear-gradient(#d45a5a, #8f2929);
 }
 
 
 /* BOTTOM BAR */
 
-#bottomBar {
-    height: 30px;
+.bottom-bar {
+    height: 35px;
     flex-shrink: 0;
 
+    background: #1c3248;
+    border-top: 2px solid #0c1926;
+
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    justify-content: space-between;
 
     padding: 0 12px;
 
-    background: #15283a;
-    border-top: 2px solid #0c1925;
+    font-size: 12px;
+}
 
-    color: #a8bac9;
+.zoom-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.zoom-controls button {
+    padding: 2px 9px;
+}
+
+
+/* STATUS BAR */
+
+.statusbar {
+    height: 30px;
+
+    background: #0c1722;
+    border-top: 2px solid #29445f;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 12px;
     font-size: 11px;
-    font-weight: bold;
+    color: #a9c3d9;
 }
