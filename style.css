@@ -1,1 +1,240 @@
-a
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background: #101820;
+    color: white;
+    font-family: Arial, sans-serif;
+    overflow: hidden;
+    user-select: none;
+}
+
+button {
+    background: linear-gradient(#647d91, #354b60);
+    border: 2px solid #172d40;
+    border-radius: 5px;
+    color: white;
+    padding: 8px 13px;
+    font-weight: bold;
+    cursor: pointer;
+    text-shadow: 1px 2px #263746;
+}
+
+button:hover {
+    filter: brightness(1.25);
+}
+
+button:active {
+    transform: translateY(1px);
+}
+
+#app {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* TOP BAR */
+
+#topbar {
+    height: 55px;
+    background: linear-gradient(#354f67, #20364a);
+    border-bottom: 3px solid #101f30;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 15px;
+}
+
+.logo {
+    font-size: 18px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    text-shadow: 2px 2px #172638;
+}
+
+.top-buttons {
+    display: flex;
+    gap: 7px;
+}
+
+.version {
+    color: #9eafbd;
+    font-size: 12px;
+}
+
+
+/* MAIN */
+
+#main {
+    flex: 1;
+    display: flex;
+    min-height: 0;
+}
+
+
+/* OBJECT PANEL */
+
+#objectPanel {
+    width: 190px;
+    min-width: 190px;
+
+    background: linear-gradient(90deg, #273f54, #1d3246);
+
+    border-right: 3px solid #101f30;
+
+    display: flex;
+    flex-direction: column;
+}
+
+.panel-title {
+    text-align: center;
+    padding: 15px;
+    font-weight: bold;
+    font-size: 16px;
+    background: #182b3d;
+    border-bottom: 2px solid #101f30;
+}
+
+.category-buttons {
+    display: flex;
+    flex-direction: column;
+    padding: 7px;
+    gap: 5px;
+}
+
+.category {
+    width: 100%;
+}
+
+.category.active {
+    background: linear-gradient(#a2c5dc, #547e9e);
+    border-color: #b5d9ec;
+}
+
+#objectList {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px;
+
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    align-content: start;
+    gap: 7px;
+}
+
+.object-button {
+    height: 75px;
+    background: linear-gradient(#405e77, #263d54);
+    border: 2px solid #15283a;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    gap: 5px;
+}
+
+.object-preview {
+    width: 30px;
+    height: 30px;
+}
+
+.object-label {
+    font-size: 10px;
+}
+
+
+/* EDITOR */
+
+#editorArea {
+    flex: 1;
+    min-width: 0;
+
+    display: flex;
+    flex-direction: column;
+    background: #182c40;
+}
+
+#editorHeader {
+    height: 43px;
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 12px;
+
+    background: linear-gradient(#405c74, #2b435a);
+    border-bottom: 2px solid #101f30;
+}
+
+#levelName {
+    font-weight: bold;
+}
+
+.editor-tools {
+    display: flex;
+    gap: 5px;
+}
+
+.tool.active {
+    background: linear-gradient(#a5d4ed, #4c87ac);
+    border-color: #b8e4ff;
+}
+
+#gameCanvas {
+    flex: 1;
+    display: block;
+    width: 100%;
+    min-height: 0;
+
+    background: #263e55;
+
+    cursor: crosshair;
+    touch-action: none;
+}
+
+#editorFooter {
+    height: 40px;
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 15px;
+
+    background: linear-gradient(#344e65, #20364a);
+    border-top: 2px solid #101f30;
+
+    font-size: 12px;
+}
+
+
+/* BOTTOM BAR */
+
+#bottomBar {
+    height: 30px;
+    flex-shrink: 0;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    padding: 0 12px;
+
+    background: #15283a;
+    border-top: 2px solid #0c1925;
+
+    color: #a8bac9;
+    font-size: 11px;
+    font-weight: bold;
+}
