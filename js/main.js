@@ -6,9 +6,13 @@ function initializeEditor() {
 
     updateObjectCount();
 
+    updateZoom();
+
+    loadObjectCategory("blocks");
+
     renderEditor();
 
-    console.log("Geometry Dash Editor v0.1 initialized.");
+    console.log("Geometry Dash Editor initialized.");
 
 }
 
