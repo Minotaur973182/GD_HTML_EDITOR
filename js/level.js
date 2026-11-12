@@ -7,6 +7,7 @@ const level = {
     selected: null,
 
     history: [],
+
     historyIndex: -1
 
 };
@@ -16,32 +17,52 @@ function saveHistory() {
 
     const snapshot = JSON.stringify(level.objects);
 
+    if (
+        level.historyIndex >= 0 &&
+        level.history[level.historyIndex] === snapshot
+    ) {
+        return;
+    }
+
     level.history = level.history.slice(0, level.historyIndex + 1);
 
     level.history.push(snapshot);
 
-    if (level.history.length > 100) {
-        level.history.shift();
-    }
-
     level.historyIndex = level.history.length - 1;
+
+    if (level.history.length > 100) {
+
+        level.history.shift();
+        level.historyIndex--;
+
+    }
 
 }
 
 
 function addObject(type, x, y) {
 
-    saveHistory();
+    const objectType = getObjectType(type);
 
-    level.objects.push({
+    if (!objectType) return;
+
+    const object = {
 
         id: crypto.randomUUID(),
-        type: type,
-        x: x,
-        y: y,
-        rotation: 0
 
-    });
+        type,
+
+        x,
+
+        y
+
+    };
+
+    level.objects.push(object);
+
+    level.selected = object.id;
+
+    saveHistory();
 
     updateObjectCount();
 
@@ -50,15 +71,13 @@ function addObject(type, x, y) {
 
 function removeObject(id) {
 
-    const index = level.objects.findIndex(obj => obj.id === id);
+    level.objects = level.objects.filter(object => object.id !== id);
 
-    if (index === -1) return;
+    if (level.selected === id) {
+        level.selected = null;
+    }
 
     saveHistory();
-
-    level.objects.splice(index, 1);
-
-    level.selected = null;
 
     updateObjectCount();
 
@@ -67,7 +86,7 @@ function removeObject(id) {
 
 function moveObject(id, x, y) {
 
-    const object = level.objects.find(obj => obj.id === id);
+    const object = level.objects.find(item => item.id === id);
 
     if (!object) return;
 
@@ -88,6 +107,7 @@ function undo() {
     level.selected = null;
 
     updateObjectCount();
+    renderEditor();
 
 }
 
@@ -103,6 +123,7 @@ function redo() {
     level.selected = null;
 
     updateObjectCount();
+    renderEditor();
 
 }
 
@@ -114,7 +135,5 @@ function updateObjectCount() {
 
 }
 
-
-// Initialize history
 
 saveHistory();
