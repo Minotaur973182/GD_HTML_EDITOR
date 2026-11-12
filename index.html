@@ -1,1 +1,112 @@
-a
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Geometry Dash Editor</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div id="app">
+
+    <!-- TOP BAR -->
+    <header id="topbar">
+
+        <div class="logo">GEOMETRY DASH EDITOR</div>
+
+        <div class="top-buttons">
+            <button id="newLevel">NEW</button>
+            <button id="saveLevel">SAVE</button>
+            <button id="exportLevel">EXPORT</button>
+            <button id="importLevel">IMPORT</button>
+        </div>
+
+        <div class="version">v0.1</div>
+
+    </header>
+
+
+    <!-- MAIN EDITOR -->
+    <main id="main">
+
+        <!-- OBJECT PANEL -->
+        <aside id="objectPanel">
+
+            <div class="panel-title">OBJECTS</div>
+
+            <div class="category-buttons">
+                <button class="category active" data-category="blocks">BLOCKS</button>
+                <button class="category" data-category="spikes">SPIKES</button>
+                <button class="category" data-category="special">SPECIAL</button>
+            </div>
+
+            <div id="objectList"></div>
+
+        </aside>
+
+
+        <!-- EDITOR AREA -->
+        <section id="editorArea">
+
+            <div id="editorHeader">
+
+                <span id="levelName">Untitled Level</span>
+
+                <div class="editor-tools">
+
+                    <button id="selectTool" class="tool active">SELECT</button>
+                    <button id="deleteTool" class="tool">DELETE</button>
+
+                    <button id="undo">UNDO</button>
+                    <button id="redo">REDO</button>
+
+                </div>
+
+            </div>
+
+            <canvas id="gameCanvas"></canvas>
+
+            <div id="editorFooter">
+
+                <span id="coordinates">X: 0 | Y: 0</span>
+
+                <div>
+                    <button id="zoomOut">-</button>
+                    <span id="zoomValue">100%</span>
+                    <button id="zoomIn">+</button>
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- BOTTOM BAR -->
+    <footer id="bottomBar">
+
+        <span>BUILD MODE</span>
+        <span id="objectCount">Objects: 0</span>
+        <span>SCROLL: ZOOM | MIDDLE MOUSE: PAN</span>
+
+    </footer>
+
+</div>
+
+<input type="file" id="importFile" accept=".json" hidden>
+
+
+<script src="js/objects.js"></script>
+<script src="js/level.js"></script>
+<script src="js/save.js"></script>
+<script src="js/editor.js"></script>
+<script src="js/toolbar.js"></script>
+<script src="js/main.js"></script>
+
+</body>
+</html>
